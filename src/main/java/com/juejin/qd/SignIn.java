@@ -9,6 +9,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StreamUtils;
@@ -21,12 +22,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class SignIn implements CommandLineRunner {
+public class SignIn {
     @Value("classpath:static/chromedriver.exe")
     File file;
 
-    @Override
-    public void run(String... args) throws Exception {
+    @Scheduled(cron ="0 0 9 * * ?")
+    public void run() throws Exception {
         one();
         //two();
     }
