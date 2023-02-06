@@ -1,1 +1,4 @@
 ## 获取谷歌驱动 "http://chromedriver.storage.googleapis.com/index.html"
+sourcePath:
+  chromedriver: "D:\\upload\\chromedriver.exe"
+  cookieJson: "D:\\upload\\cookie.json"

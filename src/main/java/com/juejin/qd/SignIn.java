@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StreamUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -23,9 +24,13 @@ import java.util.stream.Collectors;
 
 @Component
 public class SignIn {
-    @Value("classpath:static/chromedriver.exe")
-    File file;
 
+    @Value("${sourcePath.cookieJson}")
+    String cookiePath;
+    @Value("${sourcePath.chromedriver}")
+    String chromedriverPath;
+
+    @PostConstruct // 启动时执行一次
     @Scheduled(cron ="0 0 9 * * ?")
     public void run() throws Exception {
         one();
@@ -41,13 +46,12 @@ public class SignIn {
     public void two() throws IOException, InterruptedException {
         String rootUrl = "https://juejin.cn";
         String url = "https://juejin.cn/user/center/signin?avatar_menu";
-        System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
+        System.setProperty("webdriver.chrome.driver", chromedriverPath);
         ChromeOptions options = new ChromeOptions();
         // 不显示浏览器
         options.addArguments("--headless");
         WebDriver driver = new ChromeDriver(options);
         driver.get(rootUrl);
-        String cookiePath = "D:\\upload\\cookie.txt";
         File cookie = new File(cookiePath);
         if (!cookie.exists()) {
             System.out.println("cookie 文件不存在，结束运行");
@@ -110,13 +114,12 @@ public class SignIn {
         // https://juejin.cn/user/center/signin?avatar_menu
         String rootUrl = "https://juejin.cn";
         String url = "https://juejin.cn/user/center/signin?avatar_menu";
-        System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
+        System.setProperty("webdriver.chrome.driver", chromedriverPath);
         ChromeOptions options = new ChromeOptions();
         // 不显示浏览器
         options.addArguments("--headless");
         WebDriver driver = new ChromeDriver(options);
         driver.get(rootUrl);
-        String cookiePath = "D:\\upload\\cookie.json";
         File cookie = new File(cookiePath);
         if (cookie.exists()) {
             InputStream isRptFile = new FileInputStream(cookie);
