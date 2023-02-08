@@ -48,6 +48,9 @@ public class SignIn {
      */
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void bugFix() throws IOException {
+        System.out.println("【bugFix】执行 start==============================================================");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println("【bugFix】执行 当前时间：" + simpleDateFormat.format(new Date()));
         WebDriver driver = chromeDriver.get();
         try {
             String url = "https://juejin.cn/user/center/bugfix?enter_from=bugFix_bar";
@@ -68,7 +71,6 @@ public class SignIn {
                 Thread.sleep(1000);
                 List<WebElement> imgs = parentDiv.get(0).findElements(By.tagName("img"));
                 if (CollectionUtils.isEmpty(imgs)) {
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     System.out.println("【bugFix】bug 数量" + imgs.size() + "  时间：" + simpleDateFormat.format(new Date()));
                     return;
                 }
@@ -92,8 +94,8 @@ public class SignIn {
         } finally {
             driver.close();
             driver.quit();
+            System.out.println("【bugFix】执行 end==============================================================");
         }
-
     }
 
     /**
@@ -168,41 +170,48 @@ public class SignIn {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void one() throws IOException, InterruptedException {
+    public void one() throws IOException {
+        System.out.println("【签到】执行 start==============================================================");
         // https://juejin.cn
         // https://juejin.cn/user/center/signin?avatar_menu
         String url = "https://juejin.cn/user/center/signin?avatar_menu";
         WebDriver driver = chromeDriver.get();
-        driver.get(url);
-        String title = driver.getTitle();
-        System.out.println("【签到】标题 ===>" + title);
-        // 未登录框
-        List<WebElement> noLogins = driver.findElements(By.xpath("//*[@id=\"juejin\"]/div[1]/main/div[1]/div[1]/div"));
-        if (!CollectionUtils.isEmpty(noLogins)) {
-            System.out.println("【签到】获取用户名为：" + noLogins.get(0).getText());
-            System.out.println("【签到】cookie值配置失败");
-        } else {
-            List<WebElement> names = driver.findElements(By.xpath("//*[@id=\"juejin\"]/div[1]/main/div[1]/div[1]/a[2]/span"));
-            if (!CollectionUtils.isEmpty(names)) {
-                System.out.println("【签到】cookie值配置成功，当前登录用户为【" + names.get(0).getText() + "】");
+        try {
+            driver.get(url);
+            String title = driver.getTitle();
+            System.out.println("【签到】标题 ===>" + title);
+            // 未登录框
+            List<WebElement> noLogins = driver.findElements(By.xpath("//*[@id=\"juejin\"]/div[1]/main/div[1]/div[1]/div"));
+            if (!CollectionUtils.isEmpty(noLogins)) {
+                System.out.println("【签到】获取用户名为：" + noLogins.get(0).getText());
+                System.out.println("【签到】cookie值配置失败");
+            } else {
+                List<WebElement> names = driver.findElements(By.xpath("//*[@id=\"juejin\"]/div[1]/main/div[1]/div[1]/a[2]/span"));
+                if (!CollectionUtils.isEmpty(names)) {
+                    System.out.println("【签到】cookie值配置成功，当前登录用户为【" + names.get(0).getText() + "】");
 
-            }
-            basicInfoShow(driver);
-            // 手动签到
-            //*[@id="juejin"]/div[1]/main/div[2]/div/div[1]/div[2]/div[2]/div[2]/div[1]/button
-            List<WebElement> qiandao = driver.findElements(By.xpath("//*[@id=\"juejin\"]/div[1]/main/div[2]/div/div[1]/div[2]/div[2]/div[2]/div[1]/button"));
-            if (!CollectionUtils.isEmpty(qiandao)) {
-                if ("今日已签到".equals(qiandao.get(0).getText())) {
-                    System.out.println("【签到】今日已签到");
-                } else {
-                    System.out.println("【签到】成功点击签到【" + qiandao.get(0).getText() + "】");
-                    qiandao.get(0).click();
-                    basicInfoShow(driver);
+                }
+                basicInfoShow(driver);
+                // 手动签到
+                //*[@id="juejin"]/div[1]/main/div[2]/div/div[1]/div[2]/div[2]/div[2]/div[1]/button
+                List<WebElement> qiandao = driver.findElements(By.xpath("//*[@id=\"juejin\"]/div[1]/main/div[2]/div/div[1]/div[2]/div[2]/div[2]/div[1]/button"));
+                if (!CollectionUtils.isEmpty(qiandao)) {
+                    if ("今日已签到".equals(qiandao.get(0).getText())) {
+                        System.out.println("【签到】今日已签到");
+                    } else {
+                        System.out.println("【签到】成功点击签到【" + qiandao.get(0).getText() + "】");
+                        qiandao.get(0).click();
+                        basicInfoShow(driver);
+                    }
                 }
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            driver.close();
+            driver.quit();
+            System.out.println("【签到】执行 end==============================================================");
         }
-        driver.close();
-        driver.quit();
     }
 
     public static void writeObjectToFile(String obj, String filePath) {
