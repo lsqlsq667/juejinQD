@@ -2,11 +2,9 @@ package com.juejin.qd;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -22,17 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@EnableAsync
+@EnableScheduling
 public class SignIn {
-
-    @Value("${sourcePath.cookieJson}")
-    String cookiePath;
-    @Value("${sourcePath.chromedriver}")
-    String chromedriverPath;
     @Autowired
     ChromeDriver chromeDriver;
 
     /**
-     * 签到
+     * 签到 抽奖
      *
      * @throws Exception
      */
@@ -44,13 +39,63 @@ public class SignIn {
     }
 
     /**
+     * 抽奖
+     */
+    @PostConstruct // 启动时执行一次
+    @Scheduled(cron = "0 10 9 * * ?")
+    public void drawALotteryOrRaffle() throws IOException {
+        System.out.println("【lottery】执行 start==============================================================");
+        String url = "https://juejin.cn/user/center/lottery?from=lucky_lottery_menu_bar";
+        WebDriver driver = chromeDriver.get();
+        try {
+            driver.get(url);
+            Thread.sleep(1000);
+            String title = driver.getTitle();
+            System.out.println("【lottery】标题 ===>" + title);
+            WebElement element = getIfExistElement(driver, "//*[@id=\"turntable-item-0\"]/div/div");
+            if (element != null && "免费抽奖次数：1次".equals(element.getText())) {
+                System.out.println("【lottery】 " + element.getText());
+                element.click();
+                Thread.sleep(2000);
+                //收下奖励
+                WebElement shouxiajiangli = getIfExistElement(driver, "/html/body/div[13]/div[2]/div/div[2]/div/button");
+                if (shouxiajiangli != null) {
+                    shouxiajiangli.click();
+                }
+                Thread.sleep(1000);
+                WebElement zhanfuqi = getIfExistElement(driver, "//*[@id=\"stick-txt-0\"]");
+                if (zhanfuqi != null) {
+                    zhanfuqi.click();
+                }
+                Thread.sleep(1000);
+                // 收下祝福
+                WebElement shouxiazhufu = getIfExistElement(driver, "/html/body/div[3]/div[2]/div/div/div/div[4]/button");
+                if (shouxiazhufu != null) {
+                    shouxiazhufu.click();
+                }
+                // /html/body/div[3]/div[2]/div/div/div/div[4]/button
+            } else if (element != null && !"免费抽奖次数：1次".equals(element.getText())) {
+                String str = String.format("【lottery】 已经免费抽奖 当前按钮内容为【%s】", element.getText());
+                System.err.println(str);
+            } else {
+                System.err.println("【lottery】 获取抽奖按钮失败");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            driver.close();
+            driver.quit();
+            System.out.println("【lottery】执行 end==============================================================");
+        }
+    }
+
+    /**
      * bug Fix
      */
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void bugFix() throws IOException {
         System.out.println("【bugFix】执行 start==============================================================");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println("【bugFix】执行 当前时间：" + simpleDateFormat.format(new Date()));
         WebDriver driver = chromeDriver.get();
         try {
             String url = "https://juejin.cn/user/center/bugfix?enter_from=bugFix_bar";
@@ -72,7 +117,6 @@ public class SignIn {
                 List<WebElement> imgs = parentDiv.get(0).findElements(By.tagName("img"));
                 if (CollectionUtils.isEmpty(imgs)) {
                     System.out.println("【bugFix】bug 数量" + imgs.size() + "  时间：" + simpleDateFormat.format(new Date()));
-                    return;
                 }
                 if (!CollectionUtils.isEmpty(imgs)) {
                     for (WebElement img : imgs) {
@@ -107,13 +151,13 @@ public class SignIn {
     public void two() throws IOException, InterruptedException {
         String rootUrl = "https://juejin.cn";
         String url = "https://juejin.cn/user/center/signin?avatar_menu";
-        System.setProperty("webdriver.chrome.driver", chromedriverPath);
+        System.setProperty("webdriver.chrome.driver", chromeDriver.chromedriverPath);
         ChromeOptions options = new ChromeOptions();
         // 不显示浏览器
         options.addArguments("--headless");
         WebDriver driver = new org.openqa.selenium.chrome.ChromeDriver(options);
         driver.get(rootUrl);
-        File cookie = new File(cookiePath);
+        File cookie = new File(chromeDriver.cookiePath);
         if (!cookie.exists()) {
             System.out.println("cookie 文件不存在，结束运行");
             return;
