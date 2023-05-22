@@ -23,12 +23,14 @@ public class ChromeDriver {
     @Value("${sourcePath.chromedriver}")
     String chromedriverPath;
 
-    public WebDriver get() throws IOException {
-        String rootUrl = "https://juejin.cn";
+    public WebDriver get(Boolean showWin) throws IOException {
+        String rootUrl = "https://juejin.cn/";
         System.setProperty("webdriver.chrome.driver", chromedriverPath);
         ChromeOptions options = new ChromeOptions();
         // 不显示浏览器
-        options.addArguments("--headless");
+        if (!showWin) {
+            options.addArguments("--headless");
+        }
         WebDriver driver = new org.openqa.selenium.chrome.ChromeDriver(options);
         driver.get(rootUrl);
         File cookie = new File(cookiePath);

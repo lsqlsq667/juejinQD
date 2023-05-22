@@ -1,5 +1,6 @@
 package com.juejin.qd;
 
+import com.alibaba.fastjson.JSONObject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class SignIn {
     @PostConstruct // 启动时执行一次
     @Scheduled(cron = "0 10 8 * * ?")
     public void run() throws Exception {
+        System.out.println("【签到】执行");
         one();
         //two();
     }
@@ -46,7 +48,7 @@ public class SignIn {
     public void drawALotteryOrRaffle() throws IOException {
         System.out.println("【lottery】执行 start==============================================================");
         String url = "https://juejin.cn/user/center/lottery?from=lucky_lottery_menu_bar";
-        WebDriver driver = chromeDriver.get();
+        WebDriver driver = chromeDriver.get(false);
         try {
             driver.get(url);
             Thread.sleep(1000);
@@ -58,21 +60,18 @@ public class SignIn {
                 element.click();
                 Thread.sleep(2000);
                 //收下奖励
-                WebElement shouxiajiangli = getIfExistElement(driver, "/html/body/div[13]/div[2]/div/div[2]/div/button");
-                if (shouxiajiangli != null) {
-                    shouxiajiangli.click();
-                }
+                driver.get(url);
                 Thread.sleep(1000);
                 WebElement zhanfuqi = getIfExistElement(driver, "//*[@id=\"stick-txt-0\"]");
-                if (zhanfuqi != null) {
-                    zhanfuqi.click();
+                try {
+                    if (zhanfuqi != null) {
+                        zhanfuqi.click();
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
                 }
                 Thread.sleep(1000);
                 // 收下祝福
-                WebElement shouxiazhufu = getIfExistElement(driver, "/html/body/div[3]/div[2]/div/div/div/div[4]/button");
-                if (shouxiazhufu != null) {
-                    shouxiazhufu.click();
-                }
                 // /html/body/div[3]/div[2]/div/div/div/div[4]/button
             } else if (element != null && !"免费抽奖次数：1次".equals(element.getText())) {
                 String str = String.format("【lottery】 已经免费抽奖 当前按钮内容为【%s】", element.getText());
@@ -96,7 +95,7 @@ public class SignIn {
     public void bugFix() throws IOException {
         System.out.println("【bugFix】执行 start==============================================================");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        WebDriver driver = chromeDriver.get();
+        WebDriver driver = chromeDriver.get(false);
         try {
             String url = "https://juejin.cn/user/center/bugfix?enter_from=bugFix_bar";
             driver.get(url);
@@ -218,8 +217,8 @@ public class SignIn {
         System.out.println("【签到】执行 start==============================================================");
         // https://juejin.cn
         // https://juejin.cn/user/center/signin?avatar_menu
-        String url = "https://juejin.cn/user/center/signin?avatar_menu";
-        WebDriver driver = chromeDriver.get();
+        String url = "https://juejin.cn/user/center/signin";
+        WebDriver driver = chromeDriver.get(true);
         try {
             driver.get(url);
             String title = driver.getTitle();
